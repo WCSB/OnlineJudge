@@ -14,7 +14,7 @@ from contest.models import Contest, ContestStatus
 from submission.models import Submission
 from utils.api import APIView, CSRFExemptAPIView, validate_serializer
 from utils.shortcuts import rand_str, natural_sort_key
-from utils.tasks import delete_file
+from utils.tasks import delete_files
 
 from ..models import Problem, ProblemRuleType, ProblemTag
 from ..serializers import (CreateContestProblemSerializer, CompileSPJSerializer,
@@ -494,7 +494,7 @@ class ExportImportProblemAPI(APIView):
                     zip_file.write(filename=os.path.join(problem_test_case_dir, v["output_name"]),
                                    arcname=f"testcase/{v['output_name']}",
                                    compress_type=compression)
-        delete_file.apply_async((name, ), countdown=300)
+        delete_files.apply_async((name, ), countdown=300)
         resp = FileResponse(open(name, "rb"))
         resp["Content-Type"] = "application/zip"
         resp["Content-Disposition"] = f"attachment;filename=problem-{problem.id}.zip"
